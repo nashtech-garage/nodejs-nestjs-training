@@ -12,6 +12,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { IUser } from './interfaces/user.interface';
 import { CreateUserDto, UpdateUserDto } from './dtos';
+import { UsersService } from './users.service';
 
 let users: IUser[] = [
   {
@@ -27,24 +28,21 @@ let users: IUser[] = [
 
 @Controller('users')
 export class UsersController {
+  constructor(private usersService: UsersService) {}
+
   @Post()
   async create(@Body() createUserDTO: CreateUserDto): Promise<IUser> {
-    const user: IUser = {
-      ...instanceToPlain(createUserDTO),
-      id: uuidv4(),
-    } as IUser;
-    users.push(user);
-    return user;
+    return await this.usersService.create(createUserDTO);
   }
 
   @Get()
   async findAll(): Promise<IUser[]> {
-    return users;
+    return this.usersService.findAll();
   }
 
   @Get(':id')
   async findById(@Param('id') id: string): Promise<IUser> {
-    return users.find((user: IUser) => user.id === id);
+    return this.usersService.findById(id);
   }
 
   @Put(':id')
@@ -52,18 +50,11 @@ export class UsersController {
     @Param('id') id: string,
     @Body() updateUserDto: UpdateUserDto,
   ): Promise<IUser> {
-    let updatedUser: IUser = undefined;
-    users = users.map((user: IUser) => {
-      if (user.id !== id) return user;
-      updatedUser = { ...user, ...instanceToPlain(updateUserDto) };
-      return updatedUser;
-    });
-    return updatedUser;
+    return await this.usersService.update(id, updateUserDto);
   }
 
   @Delete(':id')
   async delete(@Param('id') id: string): Promise<string> {
-    users = users.filter((user: IUser) => user.id !== id);
-    return id;
+    return await this.usersService.delete(id);
   }
 }
