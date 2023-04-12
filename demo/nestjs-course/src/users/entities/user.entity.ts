@@ -10,6 +10,8 @@ export class UserEntity {
   firstName: string;
   lastName: string;
   role: string;
+  createdAt: Date;
+  updatedAt: Date;
 
   constructor(createUserDto: CreateUserDto) {
     return {

@@ -10,10 +10,7 @@ export class UsersService {
   private users: IUser[] = [];
 
   async create(createUserDTO: CreateUserDto): Promise<IUser> {
-    const user: IUser = {
-      ...instanceToPlain(createUserDTO),
-      id: uuidv4(),
-    } as IUser;
+    const user: IUser = instanceToPlain(createUserDTO) as IUser;
     this.users.push(user);
     return user;
   }
