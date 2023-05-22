@@ -3,10 +3,12 @@ import {
   Controller,
   Delete,
   Get,
+  HttpException,
   Param,
   Post,
   Put,
 } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import { instanceToPlain } from 'class-transformer';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -27,6 +29,8 @@ let users: IUser[] = [
 
 @Controller('users')
 export class UsersController {
+  private readonly logger = new Logger(UsersController.name);
+
   @Post()
   async create(@Body() createUserDTO: CreateUserDto): Promise<IUser> {
     const user: IUser = {
@@ -44,7 +48,9 @@ export class UsersController {
 
   @Get(':id')
   async findById(@Param('id') id: string): Promise<IUser> {
-    return users.find((user: IUser) => user.id === id);
+    const user = users.find((user: IUser) => user.id === id);
+    if (!user) throw new HttpException('User not found', 404);
+    return user;
   }
 
   @Put(':id')
