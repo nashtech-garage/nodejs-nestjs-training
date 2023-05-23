@@ -4,72 +4,62 @@ import {
   Delete,
   Get,
   HttpException,
+  NotFoundException,
   Param,
+  ParseUUIDPipe,
+  Patch,
   Post,
   Put,
 } from '@nestjs/common';
-import { Logger } from '@nestjs/common';
 import { instanceToPlain } from 'class-transformer';
 import { v4 as uuidv4 } from 'uuid';
 
 import { IUser } from './interfaces/user.interface';
-import { CreateUserDto, UpdateUserDto } from './dtos';
-
-let users: IUser[] = [
-  {
-    id: '1',
-    username: 'tuancv',
-    email: 'tuancv.guru@gmail.com',
-    password: 'ahsjfklsahfkashfkas',
-    firstName: 'Tuan',
-    lastName: 'Can',
-    role: 'Admin',
-  },
-];
+import { RegisterUserDto, CreateUserDto } from './dtos/create-user.dto';
+import { UpdateUserDto } from './dtos/update-user.dto';
+import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { UserEntity } from './entities/user.entity';
+import { UsersService } from './users.service';
 
 @Controller('users')
+@ApiTags('users')
 export class UsersController {
-  private readonly logger = new Logger(UsersController.name);
+  constructor(private readonly usersService: UsersService) {}
 
   @Post()
-  async create(@Body() createUserDTO: CreateUserDto): Promise<IUser> {
-    const user: IUser = {
-      ...instanceToPlain(createUserDTO),
-      id: uuidv4(),
-    } as IUser;
-    users.push(user);
-    return user;
+  @ApiCreatedResponse({ type: UserEntity })
+  async create(@Body() createUserDto: CreateUserDto): Promise<UserEntity> {
+    return this.usersService.create(createUserDto);
   }
 
   @Get()
-  async findAll(): Promise<IUser[]> {
-    return users;
+  @ApiOkResponse({ type: UserEntity, isArray: true })
+  async findAll(): Promise<UserEntity[]> {
+    return this.usersService.findAll();
   }
 
   @Get(':id')
-  async findById(@Param('id') id: string): Promise<IUser> {
-    const user = users.find((user: IUser) => user.id === id);
-    if (!user) throw new HttpException('User not found', 404);
+  @ApiOkResponse({ type: UserEntity })
+  async findOne(@Param('id', ParseUUIDPipe) id: string): Promise<UserEntity> {
+    const user: UserEntity = await this.usersService.findOne(id);
+    if (!user) {
+      throw new NotFoundException(`User with ${id} does not exist.`);
+    }
     return user;
   }
 
-  @Put(':id')
+  @Patch(':id')
+  @ApiOkResponse({ type: UserEntity })
   async update(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() updateUserDto: UpdateUserDto,
-  ): Promise<IUser> {
-    let updatedUser: IUser = undefined;
-    users = users.map((user: IUser) => {
-      if (user.id !== id) return user;
-      updatedUser = { ...user, ...instanceToPlain(updateUserDto) };
-      return updatedUser;
-    });
-    return updatedUser;
+  ): Promise<UserEntity> {
+    return this.usersService.update(id, updateUserDto);
   }
 
   @Delete(':id')
-  async delete(@Param('id') id: string): Promise<string> {
-    users = users.filter((user: IUser) => user.id !== id);
-    return id;
+  @ApiOkResponse({ type: UserEntity })
+  async remove(@Param('id', ParseUUIDPipe) id: string): Promise<UserEntity> {
+    return this.usersService.remove(id);
   }
 }
