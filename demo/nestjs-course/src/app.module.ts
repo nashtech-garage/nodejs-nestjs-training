@@ -8,6 +8,8 @@ import { validate } from './core/config/env.validation';
 import { PrismaModule } from './core/database/prisma.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { UsersModule } from './users/users.module';
+import { AuthModule } from './auth/auth.module';
+import { HashUtil } from './core/utils/hash.util';
 
 @Module({
   imports: [
@@ -30,8 +32,9 @@ import { UsersModule } from './users/users.module';
     }),
     UsersModule,
     PrismaModule,
+    AuthModule,
   ],
   controllers: [AppController, UsersController],
-  providers: [AppService],
+  providers: [AppService, HashUtil],
 })
 export class AppModule {}
