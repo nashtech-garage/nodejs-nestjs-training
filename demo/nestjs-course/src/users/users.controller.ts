@@ -3,18 +3,12 @@ import {
   Controller,
   Delete,
   Get,
-  HttpException,
   NotFoundException,
   Param,
   ParseUUIDPipe,
   Patch,
   Post,
-  Put,
 } from '@nestjs/common';
-import { instanceToPlain } from 'class-transformer';
-import { v4 as uuidv4 } from 'uuid';
-
-import { IUser } from './interfaces/user.interface';
 import { RegisterUserDto, CreateUserDto } from './dtos/create-user.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
 import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
