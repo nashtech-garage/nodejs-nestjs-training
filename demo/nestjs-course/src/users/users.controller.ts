@@ -33,6 +33,7 @@ export class UsersController {
 
   @Post()
   async create(@Body() createUserDTO: CreateUserDto): Promise<IUser> {
+    this.logger.log('Create New User');
     const user: IUser = {
       ...instanceToPlain(createUserDTO),
       id: uuidv4(),
@@ -43,11 +44,13 @@ export class UsersController {
 
   @Get()
   async findAll(): Promise<IUser[]> {
+    this.logger.log('Get List User');
     return users;
   }
 
   @Get(':id')
   async findById(@Param('id') id: string): Promise<IUser> {
+    this.logger.log('Get User by Id');
     const user = users.find((user: IUser) => user.id === id);
     if (!user) throw new HttpException('User not found', 404);
     return user;
@@ -58,6 +61,7 @@ export class UsersController {
     @Param('id') id: string,
     @Body() updateUserDto: UpdateUserDto,
   ): Promise<IUser> {
+    this.logger.log('Update User');
     let updatedUser: IUser = undefined;
     users = users.map((user: IUser) => {
       if (user.id !== id) return user;
@@ -69,6 +73,7 @@ export class UsersController {
 
   @Delete(':id')
   async delete(@Param('id') id: string): Promise<string> {
+    this.logger.log('delete User');
     users = users.filter((user: IUser) => user.id !== id);
     return id;
   }
