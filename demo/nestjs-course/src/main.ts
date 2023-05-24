@@ -12,6 +12,7 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { PrismaService } from './core/database/prisma.service';
 import { PrismaClientExceptionFilter } from './core/exception/prisma-client-exception.filter';
+import { HttpExceptionFilter } from './core/exception/http-exception.filter';
 
 async function bootstrap(): Promise<void> {
   const app: INestApplication = await NestFactory.create(AppModule);
@@ -31,6 +32,7 @@ async function bootstrap(): Promise<void> {
 
   const { httpAdapter } = app.get(HttpAdapterHost);
   app.useGlobalFilters(new PrismaClientExceptionFilter(httpAdapter));
+  app.useGlobalFilters(new HttpExceptionFilter());
 
   const config = new DocumentBuilder()
     .setTitle('NestJS Course')
