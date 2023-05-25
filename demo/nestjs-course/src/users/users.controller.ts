@@ -9,6 +9,7 @@ import {
   ParseUUIDPipe,
   NotFoundException,
   UseGuards,
+  Logger,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -27,6 +28,8 @@ import { UserEntity } from './entities/user.entity';
 @Controller('users')
 @ApiTags('users')
 export class UsersController {
+  private readonly logger = new Logger(UsersController.name);
+
   constructor(private readonly usersService: UsersService) {}
 
   @Post('register')
@@ -34,6 +37,7 @@ export class UsersController {
   async register(
     @Body(RegisterUserPipe) registerUserDto: RegisterUserDto,
   ): Promise<UserEntity> {
+    this.logger.log('Register');
     return this.usersService.create(registerUserDto);
   }
 
@@ -42,6 +46,7 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   async create(@Body() createUserDto: CreateUserDto): Promise<UserEntity> {
+    this.logger.log('Create New User');
     return this.usersService.create(createUserDto);
   }
 
@@ -50,6 +55,7 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   async findAll(): Promise<UserEntity[]> {
+    this.logger.log('Find All');
     return this.usersService.findAll();
   }
 
@@ -58,6 +64,7 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   async findOne(@Param('id', ParseUUIDPipe) id: string): Promise<UserEntity> {
+    this.logger.log('Find One');
     const user: UserEntity = await this.usersService.findOne(id);
     if (!user) {
       throw new NotFoundException(`User with ${id} does not exist.`);
@@ -73,6 +80,7 @@ export class UsersController {
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateUserDto: UpdateUserDto,
   ): Promise<UserEntity> {
+    this.logger.log('Update User');
     return this.usersService.update(id, updateUserDto);
   }
 
@@ -81,6 +89,13 @@ export class UsersController {
   @ApiBearerAuth()
   @ApiOkResponse({ type: UserEntity })
   async remove(@Param('id', ParseUUIDPipe) id: string): Promise<UserEntity> {
+    this.logger.log('Remove User');
     return this.usersService.remove(id);
+  }
+
+  @Post('ThrowError')
+  @ApiBearerAuth()
+  async error(): Promise<UserEntity> {
+    throw Error('this is Error');
   }
 }
