@@ -24,6 +24,9 @@ import { RegisterUserDto, CreateUserDto } from './dtos/create-user.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
 import { RegisterUserPipe } from './pipes/register-user.pipe';
 import { UserEntity } from './entities/user.entity';
+import { Roles } from 'src/core/utils/decorators/roles.decorators';
+import { Role } from '@prisma/client';
+import { RolesGuard } from 'src/auth/role.guard';
 
 @Controller('users')
 @ApiTags('users')
@@ -43,7 +46,8 @@ export class UsersController {
 
   @Post()
   @ApiCreatedResponse({ type: UserEntity })
-  @UseGuards(JwtAuthGuard)
+  @Roles(Role.admin, Role.blogger)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth()
   async create(@Body() createUserDto: CreateUserDto): Promise<UserEntity> {
     this.logger.log('Create New User');
@@ -52,7 +56,8 @@ export class UsersController {
 
   @Get()
   @ApiOkResponse({ type: UserEntity, isArray: true })
-  @UseGuards(JwtAuthGuard)
+  @Roles(Role.reader, Role.admin, Role.blogger)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth()
   async findAll(): Promise<UserEntity[]> {
     this.logger.log('Find All');
@@ -61,7 +66,8 @@ export class UsersController {
 
   @Get(':id')
   @ApiOkResponse({ type: UserEntity })
-  @UseGuards(JwtAuthGuard)
+  @Roles(Role.reader, Role.blogger)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth()
   async findOne(@Param('id', ParseUUIDPipe) id: string): Promise<UserEntity> {
     this.logger.log('Find One');
@@ -74,7 +80,8 @@ export class UsersController {
 
   @Patch(':id')
   @ApiOkResponse({ type: UserEntity })
-  @UseGuards(JwtAuthGuard)
+  @Roles(Role.admin)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth()
   async update(
     @Param('id', ParseUUIDPipe) id: string,
@@ -85,7 +92,8 @@ export class UsersController {
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard)
+  @Roles(Role.admin)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ type: UserEntity })
   async remove(@Param('id', ParseUUIDPipe) id: string): Promise<UserEntity> {
